@@ -14,6 +14,7 @@ case class Point(x: Int = 0, y: Int = 0) {
 		x < max.x &&
 		y < max.y
 }
+
 case class TileDirection(horizontal: Boolean, positive: Boolean) {
 	def unary_- = TileDirection(horizontal, !positive)
 	def asPoint = {
@@ -24,6 +25,7 @@ case class TileDirection(horizontal: Boolean, positive: Boolean) {
 		)
 	}
 }
+
 object TileDirection {
 	val Up = TileDirection(false, false)
 	val Down = TileDirection(false, true)
@@ -44,12 +46,14 @@ case class Tile(a: TileDirection, b: TileDirection) {
 		else if (playerFrom == -b) Some(a)
 		else None
 }
+
 object Tile {
 	def randomTile(rand: Random) = {
 		val firstDir = TileDirection.randomDirection(rand)
 		Tile(firstDir, TileDirection.randomDirectionExcept(rand, firstDir))
 	}
 }
+
 class Board(rand: Random, size: Point, watermelons: Map[Point, Tile]) { //TODO: val needed?
 	val tiles: Map[Point, Tile] = new HashMap[Point, Tile]
 	var nextTile = Tile.randomTile(rand)
