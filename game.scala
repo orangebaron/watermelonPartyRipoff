@@ -3,11 +3,6 @@ import scala.collection.mutable.HashMap
 import scala.util.Random
 
 case class Point(x: Int = 0, y: Int = 0) {
-	def +(a: Point) = Point(x + a.x, y + a.y)
-	def getInList[T](list: Array[Array[T]]): T = list(x)(y)
-	def setInList[T](item: T)(list: Array[Array[T]]): Unit = {
-		list(x)(y) = item
-	}
 	def inRange(max: Point) =
 		x > 0 &&
 		y > 0 &&
