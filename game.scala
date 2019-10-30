@@ -30,6 +30,14 @@ case class Tile(a: TileDirection, b: TileDirection) {
 		if (playerFrom == -a) Some(b)
 		else if (playerFrom == -b) Some(a)
 		else None
+	override def toString =
+		if (a == TileDirection.Up && b == TileDirection.Down || a == TileDirection.Down && b == TileDirection.Up) "|"
+		else if (a == TileDirection.Left && b == TileDirection.Right || a == TileDirection.Right && b == TileDirection.Left) "-"
+		else if (a == TileDirection.Up && b == TileDirection.Right || a == TileDirection.Right && b == TileDirection.Up) "⌞"
+		else if (a == TileDirection.Right && b == TileDirection.Down || a == TileDirection.Down && b == TileDirection.Right) "⌜"
+		else if (a == TileDirection.Down && b == TileDirection.Left || a == TileDirection.Left && b == TileDirection.Down) "⌝"
+		else if (a == TileDirection.Left && b == TileDirection.Up || a == TileDirection.Up && b == TileDirection.Left) "⌟"
+		else "X"
 }
 
 class Board(size: Point, private var _watermelons: Map[Point, Tile], tileGenerator: Board => Tile) { //TODO: val needed?
