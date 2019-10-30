@@ -1,5 +1,3 @@
-import scala.collection.mutable.Map
-import scala.collection.mutable.HashMap
 import scala.util.Random
 
 case class Point(x: Int = 0, y: Int = 0) {
@@ -50,8 +48,10 @@ object Tile {
 	}
 }
 
-class Board(rand: Random, size: Point, watermelons: Map[Point, Tile]) { //TODO: val needed?
-	val tiles: Map[Point, Tile] = new HashMap[Point, Tile]
+class Board(rand: Random, size: Point, private var _watermelons: Map[Point, Tile]) { //TODO: val needed?
+	def watermelons = _watermelons
+	private var _tiles: Map[Point, Tile] = Map()
+	def tiles = _tiles
 	var nextTile = Tile.randomTile(rand)
 	var playerLoc = Point(y = -1)
 	var playerFacing = TileDirection.Down
@@ -63,7 +63,7 @@ class Board(rand: Random, size: Point, watermelons: Map[Point, Tile]) { //TODO: 
 	} yield nextFacing
 	def tryCollectWatermelon = if (watermelons contains playerLoc) {
 		watermelonsCollected += 1
-		watermelons remove playerLoc
+		_watermelons = _watermelons - playerLoc
 	}
 	def tryWalk = nextFacing match {
 		case Some(dir) => {
@@ -79,12 +79,12 @@ class Board(rand: Random, size: Point, watermelons: Map[Point, Tile]) { //TODO: 
 	}
 	def bombLocation(loc: Point) = {
 		if (loc == playerLoc) resetPlayer
-		tiles remove loc
+		_tiles = _tiles - loc
 	}
 	def bombAroundLocation(loc: Point) =
 		for (x <- -1 to 1; y <- -1 to 1) bombLocation(Point(x, y))
 	def placeTile(loc: Point) = if (!(tiles contains loc) && loc.inRange(size)) {
-		tiles put (loc, nextTile)
+		_tiles = _tiles + (loc -> nextTile)
 		nextTile = Tile.randomTile(rand)
 	}
 }
