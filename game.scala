@@ -1,4 +1,3 @@
-import scala.util.Random
 
 case class Point(x: Int = 0, y: Int = 0) {
 	def +(a: Point) = Point(x + a.x, y + a.y)
@@ -25,14 +24,6 @@ object TileDirection {
 	val Down = TileDirection(false, true)
 	val Left = TileDirection(true, false)
 	val Right = TileDirection(true, true)
-	def randomDirection(rand: Random) =
-		TileDirection(rand.nextBoolean, rand.nextBoolean)
-	def randomDirectionExcept(rand: Random, except: TileDirection): TileDirection = {
-		val thisTry = randomDirection(rand)
-		if (thisTry == except)
-			randomDirectionExcept(rand, except)
-		else thisTry
-	}
 }
 case class Tile(a: TileDirection, b: TileDirection) {
 	def takePlayer(playerFrom: TileDirection): Option[TileDirection] = // returns where the next direction to go to would be if player can go here
@@ -41,43 +32,40 @@ case class Tile(a: TileDirection, b: TileDirection) {
 		else None
 }
 
-object Tile {
-	def randomTile(rand: Random) = {
-		val firstDir = TileDirection.randomDirection(rand)
-		Tile(firstDir, TileDirection.randomDirectionExcept(rand, firstDir))
-	}
-}
-
-class Board(rand: Random, size: Point, private var _watermelons: Map[Point, Tile]) { //TODO: val needed?
+class Board(size: Point, private var _watermelons: Map[Point, Tile], tileGenerator: Board => Tile) { //TODO: val needed?
 	def watermelons = _watermelons
 	private var _tiles: Map[Point, Tile] = Map()
 	def tiles = _tiles
-	var nextTile = Tile.randomTile(rand)
-	var playerLoc = Point(y = -1)
-	var playerFacing = TileDirection.Down
-	var watermelonsCollected: Int = 0
+	private var _nextTile = tileGenerator(this)
+	def nextTile = _nextTile
+	private var _playerLoc = Point(y = -1)
+	def playerLoc = _playerLoc
+	private var _playerFacing = TileDirection.Down
+	def playerFacing = _playerFacing
+	private var _watermelonsCollected: Int = 0
+	def watermelonsCollected = _watermelonsCollected
 	def nextLoc = playerLoc + playerFacing.asPoint
 	def nextFacing = for {
 		nextTile <- tiles get nextLoc
 		nextFacing <- nextTile.takePlayer(playerFacing)
 	} yield nextFacing
-	def tryCollectWatermelon = if (watermelons contains playerLoc) {
-		watermelonsCollected += 1
+	private def tryCollectWatermelon = if (watermelons contains playerLoc) {
+		_watermelonsCollected += 1
 		_watermelons = _watermelons - playerLoc
 	}
 	def tryWalk = nextFacing match {
 		case Some(dir) => {
-			playerLoc = nextLoc
-			playerFacing = dir
+			_playerLoc = nextLoc
+			_playerFacing = dir
 			tryCollectWatermelon
 		}
 		case _ => ()
 	}
-	def resetPlayer = {
-		playerLoc = Point(y = -1)
-		playerFacing = TileDirection.Down
+	private def resetPlayer = {
+		_playerLoc = Point(y = -1)
+		_playerFacing = TileDirection.Down
 	}
-	def bombLocation(loc: Point) = {
+	private def bombLocation(loc: Point) = {
 		if (loc == playerLoc) resetPlayer
 		_tiles = _tiles - loc
 	}
@@ -85,6 +73,6 @@ class Board(rand: Random, size: Point, private var _watermelons: Map[Point, Tile
 		for (x <- -1 to 1; y <- -1 to 1) bombLocation(Point(x, y))
 	def placeTile(loc: Point) = if (!(tiles contains loc) && loc.inRange(size)) {
 		_tiles = _tiles + (loc -> nextTile)
-		nextTile = Tile.randomTile(rand)
+		_nextTile = tileGenerator(this)
 	}
 }
