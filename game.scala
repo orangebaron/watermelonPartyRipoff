@@ -51,46 +51,52 @@ object Tile {
 
 class Board(size: Point, private var _watermelons: Set[Point], tileGenerator: Board => Tile) { //TODO: val needed?
 	def watermelons = _watermelons
+	private def watermelons_=(newVal: Set[Point]) { _watermelons = newVal }
 	private var _tiles: Map[Point, Tile] = Map()
 	def tiles = _tiles
+	private def tiles_=(newVal: Map[Point, Tile]) { _tiles = newVal }
 	private var _nextTile = tileGenerator(this)
 	def nextTile = _nextTile
+	private def nextTile_=(newVal: Tile) { _nextTile = newVal }
 	private var _playerLoc = Point(y = -1)
 	def playerLoc = _playerLoc
+	private def playerLoc_=(newVal: Point) { _playerLoc = newVal }
 	private var _playerFacing = TileDirection.Down
 	def playerFacing = _playerFacing
+	private def playerFacing_=(newVal: TileDirection) { _playerFacing = newVal }
 	private var _watermelonsCollected: Int = 0
 	def watermelonsCollected = _watermelonsCollected
+	private def watermelonsCollected_=(newVal: Int) { _watermelonsCollected = newVal }
 	def nextLoc = playerLoc + playerFacing.asPoint
 	def nextFacing = for {
 		nextTile <- tiles get nextLoc
 		nextFacing <- nextTile.takePlayer(playerFacing)
 	} yield nextFacing
 	private def tryCollectWatermelon = if (watermelons contains playerLoc) {
-		_watermelonsCollected += 1
-		_watermelons = _watermelons - playerLoc
+		watermelonsCollected += 1
+		watermelons = watermelons - playerLoc
 	}
 	def tryWalk = nextFacing match {
 		case Some(dir) => {
-			_playerLoc = nextLoc
-			_playerFacing = dir
+			playerLoc = nextLoc
+			playerFacing = dir
 			tryCollectWatermelon
 		}
 		case _ => ()
 	}
 	private def resetPlayer = {
-		_playerLoc = Point(y = -1)
-		_playerFacing = TileDirection.Down
+		playerLoc = Point(y = -1)
+		playerFacing = TileDirection.Down
 	}
 	private def bombLocation(loc: Point) = {
 		if (loc == playerLoc) resetPlayer
-		_tiles = _tiles - loc
+		tiles = tiles - loc
 	}
 	def bombAroundLocation(loc: Point) =
 		for (x <- -1 to 1; y <- -1 to 1) bombLocation(loc + Point(x, y))
 	def placeTile(loc: Point) = if (!(tiles contains loc) && loc.inRange(size)) {
-		_tiles = _tiles + (loc -> nextTile)
-		_nextTile = tileGenerator(this)
+		tiles = tiles + (loc -> nextTile)
+		nextTile = tileGenerator(this)
 	}
 	override def toString = {
 		var returnVal = ""
