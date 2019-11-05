@@ -1,11 +1,13 @@
+import scala.util.Random
 
 case class Point(x: Int = 0, y: Int = 0) {
 	def +(a: Point) = Point(x + a.x, y + a.y)
 	def inRange(max: Point) =
-		x > 0 &&
-		y > 0 &&
+		x >= 0 &&
+		y >= 0 &&
 		x < max.x &&
 		y < max.y
+	override def toString = "(" + x + "," + y + ")"
 }
 
 case class TileDirection(horizontal: Boolean, positive: Boolean) {
@@ -40,7 +42,14 @@ case class Tile(a: TileDirection, b: TileDirection) {
 		else "X"
 }
 
-class Board(size: Point, private var _watermelons: Map[Point, Tile], tileGenerator: Board => Tile) { //TODO: val needed?
+object Tile {
+	def randomTile(board: Board): Tile = {
+		val tile = Tile(TileDirection(Random.nextBoolean, Random.nextBoolean), TileDirection(Random.nextBoolean, Random.nextBoolean))
+		if (tile.toString != "X") tile else randomTile(board)
+	}
+}
+
+class Board(size: Point, private var _watermelons: Set[Point], tileGenerator: Board => Tile) { //TODO: val needed?
 	def watermelons = _watermelons
 	private var _tiles: Map[Point, Tile] = Map()
 	def tiles = _tiles
@@ -78,9 +87,58 @@ class Board(size: Point, private var _watermelons: Map[Point, Tile], tileGenerat
 		_tiles = _tiles - loc
 	}
 	def bombAroundLocation(loc: Point) =
-		for (x <- -1 to 1; y <- -1 to 1) bombLocation(Point(x, y))
+		for (x <- -1 to 1; y <- -1 to 1) bombLocation(loc + Point(x, y))
 	def placeTile(loc: Point) = if (!(tiles contains loc) && loc.inRange(size)) {
 		_tiles = _tiles + (loc -> nextTile)
 		_nextTile = tileGenerator(this)
+	}
+	override def toString = {
+		var returnVal = ""
+		for (y <- 0 until size.y) {
+			for (x <- 0 until size.x) {
+				returnVal += (tiles getOrElse (Point(x, y),  Tile(TileDirection.Up, TileDirection.Up)))
+			}
+			returnVal += "\n"
+		}
+		returnVal += "watermelon locs: "
+		for (pt <- watermelons) {
+			returnVal += pt + " "
+		}
+		returnVal += "\n"
+		returnVal += "watermelons collected: " + watermelonsCollected + "\n"
+		returnVal += "next tile: " + nextTile + "\n"
+		returnVal += "player loc: " + playerLoc + "\n"
+		returnVal += "player facing: " + playerFacing.asPoint + "\n"
+		returnVal
+	}
+}
+
+object Main {
+	def bigLoop(board: Board): Unit = {
+		println(board)
+		readLine() match {
+		case "tile" => {
+			board.placeTile(Point(readInt(), readInt()))
+			bigLoop(board)
+		}
+		case "bomb" => {
+			board.bombAroundLocation(Point(readInt(), readInt()))
+			bigLoop(board)
+		}
+		case "walk" => {
+			board.tryWalk
+			bigLoop(board)
+		}
+		case "exit" => ()
+		case _ => {
+			println("wadu")
+			bigLoop(board)
+		}
+		}
+	}
+	def main(args: Array[String]) {
+		val melons = Set(Point(), Point(3, 2), Point(2, 1))
+		val board = new Board(Point(5, 5), melons, Tile.randomTile)
+		bigLoop(board)
 	}
 }
