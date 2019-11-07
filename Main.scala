@@ -11,7 +11,7 @@ object Main {
 			bigLoop(board)
 		}
 		case "walk" => {
-			board.tryWalk
+			board.walkTick
 			bigLoop(board)
 		}
 		case "exit" => ()
@@ -23,7 +23,7 @@ object Main {
 	}
 	def main(args: Array[String]) {
 		val melons = Set(Point(), Point(3, 2), Point(2, 1))
-		val board = new Board(Point(5, 5), melons, Tile.randomTile)
+		val board = new Board(Point(5, 5), melons, Tile.randomTile, 1)
 		bigLoop(board)
 	}
 }
