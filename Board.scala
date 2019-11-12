@@ -1,4 +1,4 @@
-class Board(size: Point, startWatermelons: Set[Point], tileGenerator: Board => Tile, maxWalkLoc: Int = 0) {
+class Board(val size: Point, startWatermelons: Set[Point], tileGenerator: Board => Tile, val maxWalkLoc: Int = 0) {
 	private val playerLocMgr = new PlayerLocMgr(maxWalkLoc)
 	private val watermelonMap = new WatermelonMap(startWatermelons)
 	private val tileMap = new TileMap(size, tileGenerator, tileGenerator(this))
@@ -19,6 +19,6 @@ class Board(size: Point, startWatermelons: Set[Point], tileGenerator: Board => T
 	def playerWalkPoint = playerLocMgr.playerWalkPoint
 	def walkTick = playerLocMgr.walkTick(tileMap, watermelonMap)
 	def watermelons = watermelonMap.watermelons
-	def watermelonsColelcted = watermelonMap.watermelonsCollected
+	def watermelonsCollected = watermelonMap.watermelonsCollected
 	override def toString = "" + tileMap + playerLocMgr + watermelonMap
 }

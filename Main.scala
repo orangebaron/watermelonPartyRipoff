@@ -1,29 +1,35 @@
 object Main {
-	def bigLoop(board: Board): Unit = {
-		println(board)
+	def bigLoop(game: Game): Unit = {
+		val board = game.boards(0)
+		println(game)
 		readLine() match {
 		case "tile" => {
 			board.placeTile(Point(readInt(), readInt()))
-			bigLoop(board)
+			bigLoop(game)
 		}
 		case "bomb" => {
 			board.bombAroundLocation(Point(readInt(), readInt()))
-			bigLoop(board)
+			bigLoop(game)
 		}
 		case "walk" => {
-			board.walkTick
-			bigLoop(board)
+			game.walkTick
+			bigLoop(game)
+		}
+		case "countdown" => {
+			game.countdownTick
+			bigLoop(game)
 		}
 		case "exit" => ()
 		case _ => {
 			println("wadu")
-			bigLoop(board)
+			bigLoop(game)
 		}
 		}
 	}
 	def main(args: Array[String]) {
 		val melons = Set(Point(), Point(3, 2), Point(2, 1))
 		val board = new Board(Point(5, 5), melons, Tile.randomTile, 1)
-		bigLoop(board)
+		val game = new Game(List(board))
+		bigLoop(game)
 	}
 }
